@@ -8,12 +8,12 @@ type UserResponse struct {
 }
 
 type CreateUserInput struct {
-	Name  string `json:"name" validate:"required"`
-	Email string `json:"email" validate:"required"`
-	Bio   string `json:"bio" validate:"required"`
+	Name  string `json:"name" validate:"required" example:"John Doe"`
+	Email string `json:"email" validate:"required" example:"test@example.test"`
+	Bio   string `json:"bio" validate:"required" example:"Creative strategist and digital marketing expert"`
 }
 
 type UpdateUserInput struct {
-	Name string `json:"name"`
-	Bio  string `json:"bio"`
+	Name string `json:"name" example:"John Doe"`
+	Bio  string `json:"bio" example:"Creative strategist and digital marketing expert"`
 }

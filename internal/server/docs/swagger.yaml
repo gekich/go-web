@@ -1,0 +1,169 @@
+basePath: /
+definitions:
+  dto.CreateUserInput:
+    properties:
+      bio:
+        example: Creative strategist and digital marketing expert
+        type: string
+      email:
+        example: test@example.test
+        type: string
+      name:
+        example: John Doe
+        type: string
+    required:
+    - bio
+    - email
+    - name
+    type: object
+  dto.UpdateUserInput:
+    properties:
+      bio:
+        example: Creative strategist and digital marketing expert
+        type: string
+      name:
+        example: John Doe
+        type: string
+    type: object
+  dto.UserResponse:
+    properties:
+      bio:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+host: http://localhost:3000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: http://www.swagger.io/support
+  description: Go-web swagger example.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://swagger.io/terms/
+  title: Swagger Example API
+  version: "1.0"
+paths:
+  /users:
+    get:
+      description: Lists all users.
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.UserResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Shows all users
+  /users/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a user by its id.
+      parameters:
+      - description: user ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Ok
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Delete an Author
+    get:
+      consumes:
+      - application/json
+      description: Get an user by its id.
+      parameters:
+      - description: user ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Get an User
+    post:
+      consumes:
+      - application/json
+      description: Create a user using JSON payload
+      parameters:
+      - description: Create a user using the following format
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Create a User
+    put:
+      consumes:
+      - application/json
+      description: Update a user using JSON payload
+      parameters:
+      - description: Update user using the following format
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Update a User
+swagger: "2.0"

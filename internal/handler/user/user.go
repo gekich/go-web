@@ -29,7 +29,16 @@ func NewUserHandler(s *service.UserService, v validator.Validator) *UserHandler 
 	}
 }
 
-// GET /users/{id}
+// Get an user by its ID
+// @Summary Get an User
+// @Description Get an user by its id.
+// @Accept json
+// @Produce json
+// @Param id path int true "user ID"
+// @Success 200 {object} dto.UserResponse
+// @Failure 400 {string} Bad Request
+// @Failure 500 {string} Internal Server Error
+// @router /users/{id} [get]
 func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -48,6 +57,11 @@ func (h *UserHandler) GetUserByID(w http.ResponseWriter, r *http.Request) {
 }
 
 // ListUsers GET /users
+// @Summary Shows all users
+// @Description Lists all users.
+// @Success 200 {array}  dto.UserResponse
+// @Failure 500 {string} Internal Server Error
+// @router /users [get]
 func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := h.service.ListUsers(r.Context())
 	if err != nil {
@@ -58,7 +72,17 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, users)
 }
 
-// CreateUser POST /users
+// CreateUser creates a new user
+// Create
+// @Summary Create a User
+// @Description Create a user using JSON payload
+// @Accept json
+// @Produce json
+// @Param User body dto.CreateUserInput true "Create a user using the following format"
+// @Success 201 {object} dto.UserResponse
+// @Failure 400 {string} Bad Request
+// @Failure 500 {string} Internal Server Error
+// @router /users/{id} [post]
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var input dto.CreateUserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
@@ -81,7 +105,17 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusCreated, user)
 }
 
-// UpdateUser PUT /users/{id}
+// UpdateUser update user
+// Update
+// @Summary Update a User
+// @Description Update a user using JSON payload
+// @Accept json
+// @Produce json
+// @Param User body dto.UpdateUserInput true "Update user using the following format"
+// @Success 201 {object} dto.UserResponse
+// @Failure 400 {string} Bad Request
+// @Failure 500 {string} Internal Server Error
+// @router /users/{id} [put]
 func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)
@@ -107,7 +141,15 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, user)
 }
 
-// DeleteUser DELETE /users/{id}
+// DeleteUser a user by its ID
+// @Summary Delete a User
+// @Description Delete a user by its id.
+// @Accept json
+// @Produce json
+// @Param id path int true "user ID"
+// @Success 200 "Ok"
+// @Failure 500 {string} Internal Server Error
+// @router /users/{id} [delete]
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := strconv.ParseInt(idStr, 10, 64)

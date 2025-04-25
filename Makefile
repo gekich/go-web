@@ -12,3 +12,6 @@ migrate-status:
 
 sqlc-generate:
 	sqlc generate
+
+swagger:
+	swag init -o internal/server/docs -g cmd/server/main.go
