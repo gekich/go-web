@@ -8,6 +8,8 @@ import (
 
 type UserRepository interface {
 	GetByID(ctx context.Context, id int64) (db.User, error)
+	GetByEmail(ctx context.Context, email string) (db.User, error)
+	ExistsUserByEmail(ctx context.Context, email string) (bool, error)
 	List(ctx context.Context) ([]db.User, error)
 	Create(ctx context.Context, arg db.CreateUserParams) (db.User, error)
 	Update(ctx context.Context, arg db.UpdateUserParams) error
@@ -24,6 +26,14 @@ func NewUserRepository(q *db.Queries) UserRepository {
 
 func (r *userRepository) GetByID(ctx context.Context, id int64) (db.User, error) {
 	return r.q.GetUser(ctx, id)
+}
+
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (db.User, error) {
+	return r.q.GetUserByEmail(ctx, email)
+}
+
+func (r *userRepository) ExistsUserByEmail(ctx context.Context, email string) (bool, error) {
+	return r.q.ExistsUserByEmail(ctx, email)
 }
 
 func (r *userRepository) List(ctx context.Context) ([]db.User, error) {

@@ -7,30 +7,38 @@ package user
 
 import (
 	"context"
+	"database/sql"
 )
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
-    name, email, bio
+    name, email, password, bio
 ) VALUES (
-          $1, $2, $3
+          $1, $2, $3, $4
          )
-RETURNING id, name, email, bio, created_at, updated_at, deleted_at
+RETURNING id, name, email, password, bio, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
-	Name  string
-	Email string
-	Bio   string
+	Name     string
+	Email    string
+	Password string
+	Bio      sql.NullString
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser, arg.Name, arg.Email, arg.Bio)
+	row := q.db.QueryRowContext(ctx, createUser,
+		arg.Name,
+		arg.Email,
+		arg.Password,
+		arg.Bio,
+	)
 	var i User
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Email,
+		&i.Password,
 		&i.Bio,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -49,8 +57,21 @@ func (q *Queries) DeleteUser(ctx context.Context, id int64) error {
 	return err
 }
 
+const existsUserByEmail = `-- name: ExistsUserByEmail :one
+SELECT EXISTS (
+    SELECT 1 FROM users WHERE email = $1
+) AS exists
+`
+
+func (q *Queries) ExistsUserByEmail(ctx context.Context, email string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, existsUserByEmail, email)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const getUser = `-- name: GetUser :one
-SELECT id, name, email, bio, created_at, updated_at, deleted_at FROM users
+SELECT id, name, email, password, bio, created_at, updated_at, deleted_at FROM users
 WHERE id = $1 LIMIT 1
 `
 
@@ -61,6 +82,28 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 		&i.ID,
 		&i.Name,
 		&i.Email,
+		&i.Password,
+		&i.Bio,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, name, email, password, bio, created_at, updated_at, deleted_at FROM users
+WHERE email = $1 LIMIT 1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.Password,
 		&i.Bio,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -70,7 +113,7 @@ func (q *Queries) GetUser(ctx context.Context, id int64) (User, error) {
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT id, name, email, bio, created_at, updated_at, deleted_at FROM users
+SELECT id, name, email, password, bio, created_at, updated_at, deleted_at FROM users
 ORDER BY name
 `
 
@@ -87,6 +130,7 @@ func (q *Queries) ListUsers(ctx context.Context) ([]User, error) {
 			&i.ID,
 			&i.Name,
 			&i.Email,
+			&i.Password,
 			&i.Bio,
 			&i.CreatedAt,
 			&i.UpdatedAt,
@@ -115,7 +159,7 @@ WHERE id = $1
 type UpdateUserParams struct {
 	ID   int64
 	Name string
-	Bio  string
+	Bio  sql.NullString
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {

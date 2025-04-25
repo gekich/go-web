@@ -4,7 +4,8 @@ import (
 	"context"
 	"github.com/gekich/go-web/internal/db/user"
 	"github.com/gekich/go-web/internal/dto/user"
-	repository "github.com/gekich/go-web/internal/repository/user"
+	"github.com/gekich/go-web/internal/repository"
+	string2 "github.com/gekich/go-web/internal/util/string"
 )
 
 type UserService struct {
@@ -25,7 +26,7 @@ func (s *UserService) GetPublicUser(ctx context.Context, id int64) (dto.UserResp
 		ID:    u.ID,
 		Name:  u.Name,
 		Email: u.Email,
-		Bio:   u.Bio,
+		Bio:   string2.FromNullString(u.Bio),
 	}, nil
 }
 
@@ -41,35 +42,17 @@ func (s *UserService) ListUsers(ctx context.Context) ([]dto.UserResponse, error)
 			ID:    u.ID,
 			Name:  u.Name,
 			Email: u.Email,
-			Bio:   u.Bio,
+			Bio:   string2.FromNullString(u.Bio),
 		})
 	}
 	return result, nil
-}
-
-func (s *UserService) CreateUser(ctx context.Context, input dto.CreateUserInput) (dto.UserResponse, error) {
-	u, err := s.repo.Create(ctx, user.CreateUserParams{
-		Name:  input.Name,
-		Email: input.Email,
-		Bio:   input.Bio,
-	})
-	if err != nil {
-		return dto.UserResponse{}, err
-	}
-
-	return dto.UserResponse{
-		ID:    u.ID,
-		Name:  u.Name,
-		Email: u.Email,
-		Bio:   u.Bio,
-	}, nil
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, id int64, input dto.UpdateUserInput) error {
 	return s.repo.Update(ctx, user.UpdateUserParams{
 		ID:   id,
 		Name: input.Name,
-		Bio:  input.Bio,
+		Bio:  string2.ToNullString(input.Bio),
 	})
 }
 

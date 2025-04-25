@@ -53,7 +53,8 @@ func defaultServer() *Server {
 func (s *Server) Init() {
 	s.NewDatabase()
 	s.newRouter()
-	s.InitRoutes()
+	s.InitUserRoutes()
+	s.InitAuthRoutes()
 }
 
 func (s *Server) NewDatabase() {

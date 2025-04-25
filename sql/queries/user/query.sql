@@ -2,15 +2,24 @@
 SELECT * FROM users
 WHERE id = $1 LIMIT 1;
 
+-- name: GetUserByEmail :one
+SELECT * FROM users
+WHERE email = $1 LIMIT 1;
+
+-- name: ExistsUserByEmail :one
+SELECT EXISTS (
+    SELECT 1 FROM users WHERE email = $1
+) AS exists;
+
 -- name: ListUsers :many
 SELECT * FROM users
 ORDER BY name;
 
 -- name: CreateUser :one
 INSERT INTO users (
-    name, email, bio
+    name, email, password, bio
 ) VALUES (
-          $1, $2, $3
+          $1, $2, $3, $4
          )
 RETURNING *;
 

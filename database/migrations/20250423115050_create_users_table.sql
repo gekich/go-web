@@ -1,16 +1,15 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS users
-(
-    id bigserial,
-    name varchar(255) not null,
-    email varchar(255) not null,
-    bio text not null,
-    created_at timestamp with time zone default current_timestamp,
-    updated_at timestamp with time zone default current_timestamp,
-    deleted_at timestamp with time zone,
-                             primary key (id)
-    );
+CREATE TABLE IF NOT EXISTS users (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    bio TEXT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    deleted_at TIMESTAMPTZ
+);
 
 CREATE OR REPLACE FUNCTION update_updated_at_column()
     RETURNS TRIGGER AS $$

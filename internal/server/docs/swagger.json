@@ -18,6 +18,49 @@
     "host": "http://localhost:3000",
     "basePath": "/",
     "paths": {
+        "/register": {
+            "post": {
+                "description": "Register a user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Register",
+                "parameters": [
+                    {
+                        "description": "Register a new user",
+                        "name": "User",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.RegisterUserInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "get": {
                 "description": "Lists all users.",
@@ -43,14 +86,14 @@
         },
         "/users/{id}": {
             "get": {
-                "description": "Get an user by its id.",
+                "description": "Get a user by its id.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Get an User",
+                "summary": "Get a User",
                 "parameters": [
                     {
                         "type": "integer",
@@ -122,47 +165,6 @@
                     }
                 }
             },
-            "post": {
-                "description": "Create a user using JSON payload",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Create a User",
-                "parameters": [
-                    {
-                        "description": "Create a user using the following format",
-                        "name": "User",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/dto.CreateUserInput"
-                        }
-                    }
-                ],
-                "responses": {
-                    "201": {
-                        "description": "Created",
-                        "schema": {
-                            "$ref": "#/definitions/dto.UserResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            },
             "delete": {
                 "description": "Delete a user by its id.",
                 "consumes": [
@@ -171,7 +173,7 @@
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Delete an Author",
+                "summary": "Delete a User",
                 "parameters": [
                     {
                         "type": "integer",
@@ -196,25 +198,27 @@
         }
     },
     "definitions": {
-        "dto.CreateUserInput": {
+        "dto.RegisterUserInput": {
             "type": "object",
             "required": [
-                "bio",
                 "email",
-                "name"
+                "name",
+                "password"
             ],
             "properties": {
                 "bio": {
-                    "type": "string",
-                    "example": "Creative strategist and digital marketing expert"
+                    "type": "string"
                 },
                 "email": {
-                    "type": "string",
-                    "example": "test@example.test"
+                    "type": "string"
                 },
                 "name": {
                     "type": "string",
-                    "example": "John Doe"
+                    "minLength": 2
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6
                 }
             }
         },

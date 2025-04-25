@@ -3,7 +3,7 @@ package handler
 import (
 	"encoding/json"
 	dto "github.com/gekich/go-web/internal/dto/user"
-	service "github.com/gekich/go-web/internal/service/user"
+	"github.com/gekich/go-web/internal/service"
 	"github.com/gekich/go-web/internal/validator"
 	"net/http"
 	"strconv"
@@ -29,9 +29,9 @@ func NewUserHandler(s *service.UserService, v validator.Validator) *UserHandler 
 	}
 }
 
-// Get an user by its ID
-// @Summary Get an User
-// @Description Get an user by its id.
+// GetUserByID Get a user by its ID
+// @Summary Get a User
+// @Description Get a user by its id.
 // @Accept json
 // @Produce json
 // @Param id path int true "user ID"
@@ -72,39 +72,6 @@ func (h *UserHandler) ListUsers(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, users)
 }
 
-// CreateUser creates a new user
-// Create
-// @Summary Create a User
-// @Description Create a user using JSON payload
-// @Accept json
-// @Produce json
-// @Param User body dto.CreateUserInput true "Create a user using the following format"
-// @Success 201 {object} dto.UserResponse
-// @Failure 400 {string} Bad Request
-// @Failure 500 {string} Internal Server Error
-// @router /users/{id} [post]
-func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
-	var input dto.CreateUserInput
-	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "invalid input", http.StatusBadRequest)
-		return
-	}
-
-	err := h.validator.Validate(input)
-	if err != nil {
-		http.Error(w, "validation error:"+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	user, err := h.service.CreateUser(r.Context(), input)
-	if err != nil {
-		http.Error(w, "failed to create user", http.StatusInternalServerError)
-		return
-	}
-
-	writeJSON(w, http.StatusCreated, user)
-}
-
 // UpdateUser update user
 // Update
 // @Summary Update a User
@@ -127,6 +94,12 @@ func (h *UserHandler) UpdateUser(w http.ResponseWriter, r *http.Request) {
 	var input dto.UpdateUserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+
+	err = h.validator.Validate(input)
+	if err != nil {
+		http.Error(w, "validation error:"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 

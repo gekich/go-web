@@ -9,6 +9,7 @@ import (
 type Config struct {
 	Database
 	Api
+	Jwt
 }
 
 func New() *Config {
@@ -20,5 +21,6 @@ func New() *Config {
 	return &Config{
 		Database: DataStore(),
 		Api:      API(),
+		Jwt:      JWT(),
 	}
 }

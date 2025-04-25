@@ -1,20 +1,21 @@
 basePath: /
 definitions:
-  dto.CreateUserInput:
+  dto.RegisterUserInput:
     properties:
       bio:
-        example: Creative strategist and digital marketing expert
         type: string
       email:
-        example: test@example.test
         type: string
       name:
-        example: John Doe
+        minLength: 2
+        type: string
+      password:
+        minLength: 6
         type: string
     required:
-    - bio
     - email
     - name
+    - password
     type: object
   dto.UpdateUserInput:
     properties:
@@ -50,6 +51,34 @@ info:
   title: Swagger Example API
   version: "1.0"
 paths:
+  /register:
+    post:
+      consumes:
+      - application/json
+      description: Register a user
+      parameters:
+      - description: Register a new user
+        in: body
+        name: User
+        required: true
+        schema:
+          $ref: '#/definitions/dto.RegisterUserInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: Register
   /users:
     get:
       description: Lists all users.
@@ -85,11 +114,11 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Delete an Author
+      summary: Delete a User
     get:
       consumes:
       - application/json
-      description: Get an user by its id.
+      description: Get a user by its id.
       parameters:
       - description: user ID
         in: path
@@ -111,34 +140,7 @@ paths:
           description: Internal Server Error
           schema:
             type: string
-      summary: Get an User
-    post:
-      consumes:
-      - application/json
-      description: Create a user using JSON payload
-      parameters:
-      - description: Create a user using the following format
-        in: body
-        name: User
-        required: true
-        schema:
-          $ref: '#/definitions/dto.CreateUserInput'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            $ref: '#/definitions/dto.UserResponse'
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-        "500":
-          description: Internal Server Error
-          schema:
-            type: string
-      summary: Create a User
+      summary: Get a User
     put:
       consumes:
       - application/json
