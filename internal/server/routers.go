@@ -5,6 +5,7 @@ import (
 	handler "github.com/gekich/go-web/internal/handler/user"
 	repository "github.com/gekich/go-web/internal/repository/user"
 	service "github.com/gekich/go-web/internal/service/user"
+	validate "github.com/gekich/go-web/internal/validator"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )
@@ -13,7 +14,8 @@ func (s *Server) InitRoutes() {
 	queries := userdb.New(s.db)
 	repo := repository.NewUserRepository(queries)
 	svc := service.NewUserService(repo)
-	userHandler := handler.NewUserHandler(svc)
+	validator := validate.New()
+	userHandler := handler.NewUserHandler(svc, validator)
 
 	s.router.Route("/ping", func(router chi.Router) {
 		router.Get("/", func(w http.ResponseWriter, r *http.Request) {

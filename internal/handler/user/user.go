@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	dto "github.com/gekich/go-web/internal/dto/user"
 	service "github.com/gekich/go-web/internal/service/user"
+	"github.com/gekich/go-web/internal/validator"
 	"net/http"
 	"strconv"
 
@@ -17,11 +18,15 @@ type UserResponse struct {
 }
 
 type UserHandler struct {
-	service *service.UserService
+	service   *service.UserService
+	validator validator.Validator
 }
 
-func NewUserHandler(s *service.UserService) *UserHandler {
-	return &UserHandler{service: s}
+func NewUserHandler(s *service.UserService, v validator.Validator) *UserHandler {
+	return &UserHandler{
+		service:   s,
+		validator: v,
+	}
 }
 
 // GET /users/{id}
@@ -58,6 +63,12 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var input dto.CreateUserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
 		http.Error(w, "invalid input", http.StatusBadRequest)
+		return
+	}
+
+	err := h.validator.Validate(input)
+	if err != nil {
+		http.Error(w, "validation error:"+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
