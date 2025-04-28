@@ -5,6 +5,10 @@ import (
 	"database/sql"
 	"fmt"
 	"github.com/gekich/go-web/database"
+	"github.com/gekich/go-web/internal/auth"
+	intLogger "github.com/gekich/go-web/internal/logger"
+	"github.com/gekich/go-web/internal/middleware"
+	chiMiddleware "github.com/go-chi/chi/v5/middleware"
 	"log"
 	"net/http"
 	"os"
@@ -18,13 +22,16 @@ import (
 	"github.com/gekich/go-web/config"
 
 	db "github.com/gekich/go-web/integrations/database"
+	logger "github.com/gekich/go-web/integrations/logger"
 )
 
 type Server struct {
-	cfg *config.Config
+	cfg        *config.Config
+	jwtManager *auth.JWTManager
 
 	db     *sql.DB
 	router *chi.Mux
+	logger intLogger.Logger
 
 	httpServer *http.Server
 }
@@ -51,10 +58,23 @@ func defaultServer() *Server {
 }
 
 func (s *Server) Init() {
+	s.InitLogger()
+	s.InitJwtManager()
 	s.NewDatabase()
 	s.newRouter()
+	s.setGlobalMiddleware()
+	s.InitServiceRoutes()
 	s.InitUserRoutes()
 	s.InitAuthRoutes()
+	s.InitProfileRoutes()
+}
+
+func (s *Server) InitLogger() {
+	s.logger = logger.New(s.cfg.Env)
+}
+
+func (s *Server) InitJwtManager() {
+	s.jwtManager = auth.NewJWTManager(s.cfg.Secret, s.cfg.TokenExpiry)
 }
 
 func (s *Server) NewDatabase() {
@@ -67,6 +87,15 @@ func (s *Server) NewDatabase() {
 
 func (s *Server) newRouter() {
 	s.router = chi.NewRouter()
+}
+
+func (s *Server) setGlobalMiddleware() {
+	s.router.Use(chiMiddleware.RequestID)
+	s.router.Use(middleware.Json)
+	if s.cfg.Api.RequestLog {
+		s.router.Use(chiMiddleware.Logger)
+	}
+	s.router.Use(chiMiddleware.Recoverer)
 }
 
 func (s *Server) Migrate() {

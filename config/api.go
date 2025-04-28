@@ -7,6 +7,7 @@ import (
 
 type Api struct {
 	Name              string        `default:"go-web"`
+	Env               string        `default:"dev"`
 	Host              string        `default:"0.0.0.0"`
 	Port              string        `default:"3000"`
 	ReadHeaderTimeout time.Duration `split_words:"true" default:"60s"`

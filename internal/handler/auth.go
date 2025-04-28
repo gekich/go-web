@@ -3,20 +3,20 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	dto "github.com/gekich/go-web/internal/dto/auth"
 	"github.com/gekich/go-web/internal/service"
+	"github.com/gekich/go-web/internal/util"
 	message "github.com/gekich/go-web/internal/util/message"
-	"github.com/gekich/go-web/internal/validator"
+	"github.com/gekich/go-web/internal/util/response"
 	"net/http"
 )
 
 type AuthHandler struct {
 	service   *service.AuthService
-	validator validator.Validator
+	validator util.Validator
 }
 
-func NewAuthHandler(s *service.AuthService, v validator.Validator) *AuthHandler {
+func NewAuthHandler(s *service.AuthService, v util.Validator) *AuthHandler {
 	return &AuthHandler{
 		service:   s,
 		validator: v,
@@ -35,25 +35,23 @@ func NewAuthHandler(s *service.AuthService, v validator.Validator) *AuthHandler 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	var input dto.RegisterUserInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "invalid input", http.StatusBadRequest)
+		response.WriteError(w, "invalid input", http.StatusBadRequest)
 		return
 	}
 
 	err := h.validator.Validate(input)
 	if err != nil {
-		http.Error(w, "validation error: "+err.Error(), http.StatusInternalServerError)
+		response.WriteError(w, "validation error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	err = h.service.Register(r.Context(), input)
-	fmt.Println(err)
-	fmt.Println(message.ErrEmailInUse)
 
 	switch {
 	case errors.Is(message.ErrEmailInUse, err):
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		response.WriteError(w, err.Error(), http.StatusBadRequest)
 	case err != nil:
-		http.Error(w, "registration failed: ", http.StatusInternalServerError)
+		response.WriteError(w, "registration failed: ", http.StatusInternalServerError)
 	default:
 		w.WriteHeader(http.StatusOK)
 	}
@@ -72,13 +70,13 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var input dto.LoginInput
 	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
-		http.Error(w, "invalid input", http.StatusBadRequest)
+		response.WriteError(w, "invalid input", http.StatusBadRequest)
 		return
 	}
 
 	err := h.validator.Validate(input)
 	if err != nil {
-		http.Error(w, "validation error: "+err.Error(), http.StatusInternalServerError)
+		response.WriteError(w, "validation error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -86,9 +84,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 
 	switch {
 	case errors.Is(err, message.ErrInvalidCredentials):
-		http.Error(w, err.Error(), http.StatusUnauthorized)
+		response.WriteError(w, err.Error(), http.StatusUnauthorized)
 	case err != nil:
-		http.Error(w, "login failed", http.StatusInternalServerError)
+		response.WriteError(w, "login failed", http.StatusInternalServerError)
 	default:
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(token))

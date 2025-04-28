@@ -2,25 +2,23 @@ package service
 
 import (
 	"context"
+	"github.com/gekich/go-web/internal/auth"
 	"github.com/gekich/go-web/internal/db/user"
-	"github.com/gekich/go-web/internal/util/message"
-	util "github.com/gekich/go-web/internal/util/string"
-	"github.com/golang-jwt/jwt/v4"
-	"time"
-
 	"github.com/gekich/go-web/internal/dto/auth"
 	"github.com/gekich/go-web/internal/repository"
+	"github.com/gekich/go-web/internal/util/message"
+	util "github.com/gekich/go-web/internal/util/string"
 	"golang.org/x/crypto/bcrypt"
+	"strconv"
 )
 
 type AuthService struct {
-	repo        repository.UserRepository
-	jwtSecret   string
-	tokenExpiry time.Duration
+	repo       repository.UserRepository
+	jwtManager *auth.JWTManager
 }
 
-func NewAuthService(repo repository.UserRepository, jwtSecret string, tokenExpiry time.Duration) *AuthService {
-	return &AuthService{repo: repo, jwtSecret: jwtSecret, tokenExpiry: tokenExpiry}
+func NewAuthService(repo repository.UserRepository, jwtManager *auth.JWTManager) *AuthService {
+	return &AuthService{repo: repo, jwtManager: jwtManager}
 }
 
 func (s *AuthService) Register(ctx context.Context, input dto.RegisterUserInput) error {
@@ -57,12 +55,8 @@ func (s *AuthService) Login(ctx context.Context, input dto.LoginInput) (string, 
 		return "", errors.ErrInvalidCredentials
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id": foundUser.ID,
-		"exp":     time.Now().Add(s.tokenExpiry).Unix(),
-	})
+	signedToken, err := s.jwtManager.Generate(strconv.FormatInt(foundUser.ID, 10))
 
-	signedToken, err := token.SignedString([]byte(s.jwtSecret))
 	if err != nil {
 		return "", err
 	}
